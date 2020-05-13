@@ -5,6 +5,8 @@ import Scroll from '../../baseUI/scroll/index';
 import { Content } from './style';
 import * as actionTypes from './store/actionCreators';
 import { connect } from "react-redux";
+import { forceCheck } from "react-lazyload";
+import Loading from "../../baseUI/loading";
 
 function Recommend(props) {
     const { bannerList, recommendList, enterLoading } = props;
@@ -12,10 +14,12 @@ function Recommend(props) {
     const { getBannerDataDispatch, getRecommendListDataDispatch } = props;
 
     useEffect(() => {
-        if(!bannerList.size){
+        // 如果页面有数据，则不发请求
+        //immutable 数据结构中长度属性 size
+        if (!bannerList.size) {
             getBannerDataDispatch();
         }
-        if(!recommendList.size){
+        if (!recommendList.size) {
             getRecommendListDataDispatch();
         }
         // eslint-disable-next-line
@@ -23,16 +27,17 @@ function Recommend(props) {
 
     // 把immutable的数据类型转换为js数据类型
     const bannerListJS = bannerList ? bannerList.toJS() : [];
-    const recommendListJS = recommendList ? recommendList.toJS() :[];
+    const recommendListJS = recommendList ? recommendList.toJS() : [];
 
     return (
         <Content>
-            <Scroll className="list">
+            <Scroll className="list" onScroll={forceCheck}>
                 <div>
                     <Slider bannerList={bannerListJS}/>
                     <RecommendList recommendList={recommendListJS}/>
                 </div>
             </Scroll>
+            {enterLoading && <Loading/>}
         </Content>
     )
 }
