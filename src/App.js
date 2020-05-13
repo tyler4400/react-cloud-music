@@ -11,8 +11,8 @@ function App() {
   return (
     <Provider store={store}>
       <HashRouter>
-        <GlobalStyle></GlobalStyle>
-        <IconStyle></IconStyle>
+        <GlobalStyle />
+        <IconStyle />
         { renderRoutes(routes) }
       </HashRouter>
     </Provider>
