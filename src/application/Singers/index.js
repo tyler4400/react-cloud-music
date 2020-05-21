@@ -1,27 +1,132 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Horizen from "../../baseUI/horizen-item";
 import { categoryTypes, alphaTypes } from '../../api/config'
-import { NavContainer } from "./style";
+import { List, ListContainer, ListItem, NavContainer } from "./style";
+import Scroll from "../../baseUI/scroll";
+import { connect } from 'react-redux';
+import {
+    changeEnterLoading,
+    changePageCount,
+    changePullDownLoading, changePullUpLoading,
+    getHotSingerList,
+    getSingerList, refreshMoreHotSingerList, refreshMoreSingerList
+} from "./store/actionCreators";
+import  LazyLoad, {forceCheck} from 'react-lazyload';
+import Loading from '../../baseUI/loading';
 
 function Singers(props) {
 
-    const [category, setCategory] = useState(null)
-    const [alpha, setAlpha] = useState(null)
+    const [category, setCategory] = useState('')
+    const [alpha, setAlpha] = useState('')
+
+    const { singerList, enterLoading, pullUpLoading, pullDownLoading, pageCount } = props
+    const { getHotSingerDispatch, updateDispatch, pullUpRefreshDispatch, pullDownRefreshDispatch } = props
+
+    useEffect(() => {
+        getHotSingerDispatch()
+    }, [])
+
+    const handleUpdateAlpha = (val) => {
+        setAlpha(val);
+        updateDispatch(category, val);
+    };
+
+    const handleUpdateCatetory = (val) => {
+        setCategory(val);
+        updateDispatch(val, alpha);
+    };
+
+    const renderSingerList = () => {
+        const list = singerList ? singerList.toJS() : [];
+        return (
+            <List>
+                {
+                    list.map((item, index) => (
+                        <ListItem key={item.accountId + '' + index}>
+                            <div className="img_wrapper">
+                                <LazyLoad placeholder={<img width="100%" height="100%" src={require('./singer.png')} alt="music"/>}>
+                                    <img src={`${item.picUrl}?param=300x300`}
+                                         width="100%"
+                                         height="100%"
+                                         alt="music"/>
+                                </LazyLoad>
+                            </div>
+                            <span className="name">{item.name}</span>
+                        </ListItem>
+                    ))
+                }
+            </List>
+        )
+    }
 
     return (
-        <NavContainer>
-            <Horizen
-                oldVal={category}
-                list={categoryTypes}
-                handleClick={setCategory}
-                title="分类 (默认热门):"/>
-            <Horizen
-                oldVal={alpha}
-                list={alphaTypes}
-                handleClick={setAlpha}
-                title="首字母:"/>
-        </NavContainer>
+        <div>
+            <NavContainer>
+                <Horizen
+                    oldVal={category}
+                    list={categoryTypes}
+                    handleClick={handleUpdateCatetory}
+                    title="分类 (默认热门):"/>
+                <Horizen
+                    oldVal={alpha}
+                    list={alphaTypes}
+                    handleClick={handleUpdateAlpha}
+                    title="首字母:"/>
+            </NavContainer>
+            <ListContainer>
+                <Scroll
+                    pullDown={() => pullDownRefreshDispatch(category, alpha)}
+                    pullUp={() => pullUpRefreshDispatch(category, alpha, category === '', pageCount)}
+                    pullUpLoading={pullUpLoading}
+                    pullDownLoading={pullDownLoading}
+                    onScroll={forceCheck}
+                >
+                    {renderSingerList()}
+                </Scroll>
+                <Loading show={enterLoading} />
+            </ListContainer>
+        </div>
     )
 }
 
-export default React.memo(Singers);
+const mapStateToProps = state => ({
+    singerList: state.getIn(['singers', 'singerList']),
+    enterLoading: state.getIn(['singers', 'enterLoading']),
+    pullUpLoading: state.getIn(['singers', 'pullUpLoading']),
+    pullDownLoading: state.getIn(['singers', 'pullDownLoading']),
+    pageCount: state.getIn(['singers', 'pageCount']),
+})
+
+const mapDispatchToProps = dispatch => ({
+    getHotSingerDispatch() {
+        dispatch(getHotSingerList())
+    },
+    updateDispatch(category, alpha) {
+        dispatch(changePageCount(0));
+        dispatch(changeEnterLoading(true));
+        dispatch(getSingerList(category, alpha));
+    },
+    // 滑到最底部刷新部分的处理
+    pullUpRefreshDispatch(category, alpha, hot, count) {
+        console.log(hot);
+        dispatch(changePullUpLoading(true));
+        dispatch(changePageCount(count + 1));
+        if (hot) {
+            dispatch(refreshMoreHotSingerList());
+        } else {
+            dispatch(refreshMoreSingerList(category, alpha));
+        }
+    },
+    //顶部下拉刷新
+    pullDownRefreshDispatch(category, alpha) {
+        dispatch(changePullDownLoading(true)); // fixme 我这里有个bug，下拉的动画加载不出来。携带正确payload的action已经分发出去了，但是state没变，还是false
+        dispatch(changePageCount(0));
+        if(category === '' && alpha === ''){
+            dispatch(getHotSingerList());
+        } else {
+            dispatch(getSingerList(category, alpha));
+        }
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(React.memo(Singers));
