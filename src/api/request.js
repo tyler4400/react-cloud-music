@@ -35,3 +35,11 @@ export const getHotSingerListRequest = (count) => {
 export const getSingerListRequest= (category, alpha, count) => {
     return axiosInstance.get(`/artist/list?cat=${category}&initial=${alpha.toLowerCase()}&offset=${count}`);
 }
+
+/**
+ * 获取排行榜数据列表
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+export const getRankListRequest = () => {
+    return axiosInstance.get (`/toplist/detail`);
+};
