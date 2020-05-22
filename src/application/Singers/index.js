@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Horizen from "../../baseUI/horizen-item";
 import { categoryTypes, alphaTypes } from '../../api/config'
 import { List, ListContainer, ListItem, NavContainer } from "./style";
@@ -11,28 +11,32 @@ import {
     getHotSingerList,
     getSingerList, refreshMoreHotSingerList, refreshMoreSingerList
 } from "./store/actionCreators";
-import  LazyLoad, {forceCheck} from 'react-lazyload';
+import LazyLoad, { forceCheck } from 'react-lazyload';
 import Loading from '../../baseUI/loading';
+import { CategoryDataContext, CHANGE_ALPHA, CHANGE_CATEGORY } from "./data";
 
 function Singers(props) {
 
-    const [category, setCategory] = useState('')
-    const [alpha, setAlpha] = useState('')
-
+    // const [category, setCategory] = useState('')
+    // const [alpha, setAlpha] = useState('')
+    const { data, dispatch } = useContext(CategoryDataContext)
+    const { category, alpha } = data.toJS()
     const { singerList, enterLoading, pullUpLoading, pullDownLoading, pageCount } = props
     const { getHotSingerDispatch, updateDispatch, pullUpRefreshDispatch, pullDownRefreshDispatch } = props
 
     useEffect(() => {
-        getHotSingerDispatch()
+        if (!singerList.size) {
+            getHotSingerDispatch()
+        }
     }, [])
 
     const handleUpdateAlpha = (val) => {
-        setAlpha(val);
+        dispatch({ type: CHANGE_ALPHA, data: val });
         updateDispatch(category, val);
     };
 
     const handleUpdateCatetory = (val) => {
-        setCategory(val);
+        dispatch({ type: CHANGE_CATEGORY, data: val });
         updateDispatch(val, alpha);
     };
 
@@ -44,7 +48,8 @@ function Singers(props) {
                     list.map((item, index) => (
                         <ListItem key={item.accountId + '' + index}>
                             <div className="img_wrapper">
-                                <LazyLoad placeholder={<img width="100%" height="100%" src={require('./singer.png')} alt="music"/>}>
+                                <LazyLoad placeholder={<img width="100%" height="100%" src={require('./singer.png')}
+                                                            alt="music"/>}>
                                     <img src={`${item.picUrl}?param=300x300`}
                                          width="100%"
                                          height="100%"
@@ -83,7 +88,7 @@ function Singers(props) {
                 >
                     {renderSingerList()}
                 </Scroll>
-                <Loading show={enterLoading} />
+                <Loading show={enterLoading}/>
             </ListContainer>
         </div>
     )
@@ -110,7 +115,7 @@ const mapDispatchToProps = dispatch => ({
     pullUpRefreshDispatch(category, alpha, hot, count) {
         console.log(hot);
         dispatch(changePullUpLoading(true));
-        dispatch(changePageCount(count + 1));
+        dispatch(changePageCount(count + 1)); // todo 这里pagecount和接口的offset不对应的
         if (hot) {
             dispatch(refreshMoreHotSingerList());
         } else {
@@ -121,7 +126,7 @@ const mapDispatchToProps = dispatch => ({
     pullDownRefreshDispatch(category, alpha) {
         dispatch(changePullDownLoading(true)); // fixme 我这里有个bug，下拉的动画加载不出来。携带正确payload的action已经分发出去了，但是state没变，还是false
         dispatch(changePageCount(0));
-        if(category === '' && alpha === ''){
+        if (category === '' && alpha === '') {
             dispatch(getHotSingerList());
         } else {
             dispatch(getSingerList(category, alpha));

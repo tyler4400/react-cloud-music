@@ -7,7 +7,6 @@ import * as actionTypes from './store/actionCreators';
 import { connect } from "react-redux";
 import { forceCheck } from "react-lazyload";
 import Loading from "../../baseUI/loading";
-import { ListContainer } from "../Singers/style";
 
 function Recommend(props) {
     const { bannerList, recommendList, enterLoading } = props;
