@@ -6,6 +6,9 @@ import Scroll from "../../baseUI/scroll";
 import SongsList from "../SongsList";
 import Loading from "../../baseUI/loading";
 import { HEADER_HEIGHT } from "../../api/config";
+import { getSingerInfo } from "./store/actionCreators";
+import { changeEnterLoading } from "../Album/store/actionCreators";
+import { connect } from "react-redux";
 
 function Singer(props) {
 
@@ -15,130 +18,18 @@ function Singer(props) {
         loading,
     } = props;
 
+    const { getSingerDataDispatch } = props;
+    const artist = immutableArtist.toJS();
+    const songs = immutableSongs.toJS();
+    useEffect (() => {
+        const id = props.match.params.id;
+        getSingerDataDispatch (id);
+    }, []);
+
     const [showStatus, setShowStatus] = useState(true);
     const setShowStatusFalse = useCallback(() => {
         setShowStatus(false)
     }, [])
-
-    const artist = {
-        picUrl: "https://p2.music.126.net/W__FCWFiyq0JdPtuLJoZVQ==/109951163765026271.jpg",
-        name: "薛之谦",
-        hotSongs: [
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{ name: "薛之谦" }],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            // 省略 20 条
-        ]
-    }
 
     const collectButton = useRef();
     const imageWrapper = useRef();
@@ -227,7 +118,7 @@ function Singer(props) {
                         onScroll={handleScroll}
                     >
                         <SongsList
-                            songs={artist.hotSongs}
+                            songs={songs}
                             showCollect={false}
                         />
                     </Scroll>
@@ -238,4 +129,22 @@ function Singer(props) {
     )
 }
 
-export default Singer;
+// 映射Redux全局的state到组件的props上
+const mapStateToProps = state => ({
+    artist: state.getIn(["singerInfo", "artist"]),
+    songs: state.getIn(["singerInfo", "songsOfArtist"]),
+    loading: state.getIn(["singerInfo", "loading"]),
+});
+// 映射dispatch到props上
+const mapDispatchToProps = dispatch => {
+    return {
+        getSingerDataDispatch(id) {
+            dispatch(changeEnterLoading(true));
+            dispatch(getSingerInfo(id));
+        }
+    };
+};
+
+// 将ui组件包装成容器组件
+export default connect(mapStateToProps,mapDispatchToProps)(React.memo(Singer));
+
