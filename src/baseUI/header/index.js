@@ -5,8 +5,7 @@ import PropTypes from "prop-types";
 
 const HeaderContainer = styled.div`
   position: fixed;
-  padding: 5px 10px;
-  padding-top: 0;
+  padding: 0 10px 5px;
   height: 40px;
   width: 100%;
   z-index: 100;
@@ -29,7 +28,10 @@ const Header = React.forwardRef((props, ref) => {
     return (
         <HeaderContainer ref={ref}>
             <i className="iconfont back"  onClick={handleClick}>&#xe655;</i>
-            <h1>{title}</h1>
+            {
+                isMarquee ? <marquee><h1>{title}</h1></marquee>:
+                    <h1>{title}</h1>
+            }
         </HeaderContainer>
     )
 })

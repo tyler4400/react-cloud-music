@@ -23,12 +23,8 @@ function Rank(props) {
         getRankListDataDispatch()
     }, [])
 
-    const enterDetail = (name) => {
-        // const idx = filterIdx(name);
-        // if(idx === null) {
-        //     alert("暂无相关数据");
-        //     return;
-        // }
+    const enterDetail = (detail) => {
+        props.history.push(`/rank/${detail.id}`)
     }
 
     // 这是渲染榜单列表函数，传入 global 变量来区分不同的布局方式
@@ -39,7 +35,7 @@ function Rank(props) {
                     <ListItem
                         key={item.coverImgId}
                         tracks={item.tracks}
-                        onClick={() => enterDetail(item.name)}
+                        onClick={() => enterDetail(item)}
                     >
                         <div className="img_wrapper">
                             <img src={item.coverImgUrl} alt=""/>

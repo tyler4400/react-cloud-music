@@ -50,7 +50,7 @@ const Scroll = forwardRef((props, ref) => {
     let pullUpDebounce = useMemo(() => {
         return debounce(pullUp, 300)
     }, [pullUp]);
-// 千万注意，这里不能省略依赖，
+// 千万注意，这里不能省略依赖pullDown，
 // 不然拿到的始终是第一次 pullUp 函数的引用，相应的闭包作用域变量都是第一次的，产生闭包陷阱。下同。
     let pullDownDebounce = useMemo(() => {
         return debounce(pullDown, 300)
