@@ -14,6 +14,7 @@ import {
 import LazyLoad, { forceCheck } from 'react-lazyload';
 import Loading from '../../baseUI/loading';
 import { CategoryDataContext, CHANGE_ALPHA, CHANGE_CATEGORY } from "./data";
+import { renderRoutes } from "react-router-config";
 
 function Singers(props) {
 
@@ -40,13 +41,20 @@ function Singers(props) {
         updateDispatch(val, alpha);
     };
 
+    const handleClick = (id) => {
+        props.history.push(`/Singers/${id}`)
+    }
+
     const renderSingerList = () => {
         const list = singerList ? singerList.toJS() : [];
         return (
             <List>
                 {
                     list.map((item, index) => (
-                        <ListItem key={item.accountId + '' + index}>
+                        <ListItem
+                            key={item.accountId + '' + index}
+                            onClick={() => handleClick(item.id)}
+                        >
                             <div className="img_wrapper">
                                 <LazyLoad placeholder={<img width="100%" height="100%" src={require('./singer.png')}
                                                             alt="music"/>}>
@@ -66,30 +74,33 @@ function Singers(props) {
 
     return (
         <div>
-            <NavContainer>
-                <Horizen
-                    oldVal={category}
-                    list={categoryTypes}
-                    handleClick={handleUpdateCatetory}
-                    title="分类 (默认热门):"/>
-                <Horizen
-                    oldVal={alpha}
-                    list={alphaTypes}
-                    handleClick={handleUpdateAlpha}
-                    title="首字母:"/>
-            </NavContainer>
-            <ListContainer>
-                <Scroll
-                    pullDown={() => pullDownRefreshDispatch(category, alpha)}
-                    pullUp={() => pullUpRefreshDispatch(category, alpha, category === '', pageCount)}
-                    pullUpLoading={pullUpLoading}
-                    pullDownLoading={pullDownLoading}
-                    onScroll={forceCheck}
-                >
-                    {renderSingerList()}
-                </Scroll>
-                <Loading show={enterLoading}/>
-            </ListContainer>
+            <>
+                <NavContainer>
+                    <Horizen
+                        oldVal={category}
+                        list={categoryTypes}
+                        handleClick={handleUpdateCatetory}
+                        title="分类 (默认热门):"/>
+                    <Horizen
+                        oldVal={alpha}
+                        list={alphaTypes}
+                        handleClick={handleUpdateAlpha}
+                        title="首字母:"/>
+                </NavContainer>
+                <ListContainer>
+                    <Scroll
+                        pullDown={() => pullDownRefreshDispatch(category, alpha)}
+                        pullUp={() => pullUpRefreshDispatch(category, alpha, category === '', pageCount)}
+                        pullUpLoading={pullUpLoading}
+                        pullDownLoading={pullDownLoading}
+                        onScroll={forceCheck}
+                    >
+                        {renderSingerList()}
+                    </Scroll>
+                    <Loading show={enterLoading}/>
+                </ListContainer>
+            </>
+            {renderRoutes(props.route.routes)}
         </div>
     )
 }
