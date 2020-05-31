@@ -9,10 +9,33 @@ import {
     changePlayMode,
     changeFullScreen
 } from "./store/actionCreators";
+import MiniPlayer from "./miniPlayer";
+import NormalPlayer from "./normalPlayer";
+
+const currentSong = {
+    al: { picUrl: "https://p1.music.126.net/JL_id1CFwNJpzgrXwemh4Q==/109951164172892390.jpg" },
+    name: "木偶人",
+    ar: [{ name: "薛之谦" }]
+}
 
 function Player(props) {
+
+    const { fullScreen } = props;
+    const { toggleFullScreenDispatch } = props;
+
     return (
-        <div>Player</div>
+        <div>
+            <MiniPlayer
+                song={currentSong}
+                fullScreen={fullScreen}
+                toggleFullScreen={toggleFullScreenDispatch}
+            />
+            <NormalPlayer
+                song={currentSong}
+                fullScreen={fullScreen}
+                toggleFullScreen={toggleFullScreenDispatch}
+            />
+        </div>
     )
 }
 
